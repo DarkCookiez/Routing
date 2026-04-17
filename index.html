@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Route Finder Pro+ | MapQuest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://api.mqcdn.com/sdk/mapquest-js/v1.3.2/mapquest.css"
+  />
+  <style>
+    :root {
+      --bg: #0d0f14;
+      --surface: #161b25;
+      --card: #1c2230;
+      --border: #2a3348;
+      --accent: #3b82f6;
+      --accent2: #06b6d4;
+      --green: #22c55e;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 30%),
+        radial-gradient(circle at top right, rgba(6, 182, 212, 0.08), transparent 24%),
+        var(--bg);
+      color: var(--text);
+      font-family: "Syne", sans-serif;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 28px;
+      background: linear-gradient(135deg, #0f1929 0%, #0d1520 100%);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .logo span {
+      color: var(--accent);
+    }
+
+    .badge {
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .header-meta {
+      color: var(--muted);
+      font-family: "DM Mono", monospace;
+      font-size: 0.75rem;
+      text-align: right;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 390px 1fr;
+      gap: 20px;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px 20px 28px;
+    }
+
+    @media (max-width: 960px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel,
+    .results-panel {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(22, 27, 37, 0.94);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+    }
+
+    .panel {
+      padding: 22px;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .panel-title::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--card);
+      color: var(--text);
+      font-family: "DM Mono", monospace;
+      font-size: 0.86rem;
+      outline: none;
+      transition: border-color 0.18s ease, transform 0.18s ease;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    select option {
+      background: var(--card);
+    }
+
+    .helper {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.5;
+    }
+
+    .helper code {
+      padding: 1px 5px;
+      border-radius: 6px;
+      background: rgba(59, 130, 246, 0.1);
+      color: #cbd5e1;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 11px;
+      font-family: "Syne", sans-serif;
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      flex: 1;
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+    }
+
+    .btn-primary:disabled {
+      background: #475569;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      flex: 0 0 auto;
+      width: 46px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .btn-secondary:hover {
+      background: #223049;
+    }
+
+    #map {
+      height: 360px;
+      margin-top: 18px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #111827;
+    }
+
+    .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .results-panel {
+      overflow: hidden;
+    }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(90deg, #1a2540, #111827);
+    }
+
+    .results-header h3 {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--muted);
+    }
+
+    .status-dot.active {
+      background: var(--green);
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.85);
+    }
+
+    .table-scroll {
+      max-height: 320px;
+      overflow-x: auto;
+      overflow-y: auto;
+    }
+
+    .table-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    .table-scroll::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: var(--border);
+    }
+
+    .summary-table,
+    .dir-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .summary-table {
+      font-family: "DM Mono", monospace;
+      font-size: 0.82rem;
+    }
+
+    .summary-table thead tr,
+    .dir-table thead tr {
+      background: #111827;
+    }
+
+    .summary-table th,
+    .dir-table th {
+      padding: 10px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .summary-table td,
+    .dir-table td {
+      padding: 11px 16px;
+      border-bottom: 1px solid rgba(42, 51, 72, 0.6);
+      color: var(--text);
+      vertical-align: top;
+    }
+
+    .summary-table tr:last-child td,
+    .dir-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .summary-table tr:hover td,
+    .dir-table tr:hover td {
+      background: rgba(59, 130, 246, 0.04);
+    }
+
+    .dir-table {
+      font-size: 0.8rem;
+    }
+
+    .dir-table td {
+      color: #cbd5e1;
+      font-family: "DM Mono", monospace;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .tag-blue {
+      background: rgba(59, 130, 246, 0.15);
+      color: #93c5fd;
+    }
+
+    .tag-green {
+      background: rgba(34, 197, 94, 0.15);
+      color: #86efac;
+    }
+
+    .tag-yellow {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fcd34d;
+    }
+
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+
+    .placeholder,
+    .loader {
+      padding: 42px 24px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .placeholder p,
+    .loader p {
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .placeholder .lead {
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .loader {
+      display: none;
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      margin: 0 auto 12px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 999px;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .error-msg {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 16px;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      border-radius: 10px;
+      background: rgba(239, 68, 68, 0.1);
+      color: #fca5a5;
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .map-lockup {
+      position: relative;
+    }
+
+    .map-overlay {
+      position: absolute;
+      inset: 18px 0 0 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: rgba(13, 15, 20, 0.7);
+      border: 1px dashed rgba(100, 116, 139, 0.45);
+      color: #cbd5e1;
+      font-family: "DM Mono", monospace;
+      font-size: 0.78rem;
+      backdrop-filter: blur(3px);
+      pointer-events: none;
+    }
+
+    .map-overlay.show {
+      display: flex;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      Route<span>Finder</span>
+      <div class="badge">MapQuest</div>
+    </div>
+    <div class="header-meta">
+      API-key authentication
+      <br />
+      Directions + interactive map
+    </div>
+  </header>
+
+  <div class="container">
+    <div>
+      <div class="panel">
+        <div class="panel-title">Route Input</div>
+
+        <div class="field">
+          <label for="apiKey">MapQuest API Key</label>
+          <input
+            id="apiKey"
+            placeholder="Paste your MapQuest key here"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="field">
+          <label for="start">Starting Location</label>
+          <input
+            id="start"
+            placeholder="e.g. Iligan City, Philippines"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="field">
+          <label for="end">Destination</label>
+          <input
+            id="end"
+            placeholder="e.g. Cagayan de Oro City, Philippines"
+            autocomplete="off"
+          />
+          <div class="helper">
+            For best results, include the city and country:
+            <code>Ozamiz City, Philippines</code>,
+            <code>Cagayan de Oro City, Philippines</code>, or a full street
+            address.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="mode">Transport Mode</label>
+          <select id="mode">
+            <option value="fastest">Car (Fastest)</option>
+            <option value="bicycle">Bicycle</option>
+            <option value="pedestrian">Walking</option>
+          </select>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-primary" id="goBtn" onclick="getRoute()">Get Route</button>
+          <button class="btn-secondary" type="button" title="Use my location" onclick="getCurrentLocation()">L</button>
+          <button class="btn-secondary" type="button" title="Clear results" onclick="clearAll()">X</button>
+        </div>
+
+        <div class="error-msg" id="errorMsg"></div>
+      </div>
+
+      <div class="map-lockup">
+        <div id="map"></div>
+        <div class="map-overlay show" id="mapOverlay">
+          Enter your API key, then request a route to load the map.
+        </div>
+      </div>
+    </div>
+
+    <div class="right-col">
+      <div class="results-panel">
+        <div class="results-header">
+          <h3>Route Summary</h3>
+          <div class="status-dot" id="statusDot"></div>
+        </div>
+        <div class="loader" id="loader">
+          <div class="spinner"></div>
+          <p>Calculating route with MapQuest...</p>
+        </div>
+        <div id="summaryContent">
+          <div class="placeholder">
+            <p class="lead">Ready for your first route.</p>
+            <p>Paste your API key, enter two places, and the route summary will appear here.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="results-panel">
+        <div class="results-header">
+          <h3>Turn-by-Turn Directions</h3>
+        </div>
+        <div id="directionsContent">
+          <div class="placeholder">
+            <p class="lead">Directions will appear here.</p>
+            <p>Each maneuver returned by the MapQuest Directions API will be listed in a table.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://api.mqcdn.com/sdk/mapquest-js/v1.3.2/mapquest.js"></script>
+  <script>
+    const DEFAULT_KEY = "YOUR_MAPQUEST_KEY_HERE";
+
+    const state = {
+      map: null,
+      activeKey: "",
+      routeLine: null,
+      startMarker: null,
+      endMarker: null
+    };
+
+    window.addEventListener("load", function () {
+      const savedKey = localStorage.getItem("mapquest-api-key") || "";
+      if (savedKey) {
+        document.getElementById("apiKey").value = savedKey;
+      }
+      document.getElementById("start").addEventListener("keydown", handleEnterKey);
+      document.getElementById("end").addEventListener("keydown", handleEnterKey);
+    });
+
+    function handleEnterKey(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        getRoute();
+      }
+    }
+
+    function getApiKey() {
+      const raw = document.getElementById("apiKey").value.trim();
+      return raw || DEFAULT_KEY;
+    }
+
+    function ensureMapQuestReady() {
+      const apiKey = getApiKey();
+      if (!apiKey || apiKey === DEFAULT_KEY) {
+        showError("Paste your MapQuest API key first.");
+        return false;
+      }
+
+      localStorage.setItem("mapquest-api-key", apiKey);
+
+      if (state.activeKey !== apiKey) {
+        state.activeKey = apiKey;
+        L.mapquest.key = apiKey;
+        rebuildMap();
+      } else if (!state.map) {
+        L.mapquest.key = apiKey;
+        rebuildMap();
+      }
+
+      document.getElementById("mapOverlay").classList.remove("show");
+      return true;
+    }
+
+    function rebuildMap() {
+      if (state.map) {
+        state.map.remove();
+      }
+
+      state.map = L.mapquest.map("map", {
+        center: [8.228, 124.245],
+        layers: L.mapquest.tileLayer("dark"),
+        zoom: 11,
+        zoomControl: true
+      });
+
+      state.routeLine = null;
+      state.startMarker = null;
+      state.endMarker = null;
+    }
+
+    function toggleLoader(show) {
+      document.getElementById("loader").style.display = show ? "block" : "none";
+      document.getElementById("goBtn").disabled = show;
+    }
+
+    function showError(message) {
+      const errorBox = document.getElementById("errorMsg");
+      errorBox.textContent = message;
+      errorBox.style.display = "block";
+    }
+
+    function clearError() {
+      document.getElementById("errorMsg").style.display = "none";
+    }
+
+    function clearAll() {
+      document.getElementById("start").value = "";
+      document.getElementById("end").value = "";
+      clearError();
+      toggleLoader(false);
+      document.getElementById("statusDot").className = "status-dot";
+      document.getElementById("summaryContent").innerHTML =
+        '<div class="placeholder"><p class="lead">Ready for your next route.</p><p>Enter a start and destination to generate a fresh summary table.</p></div>';
+      document.getElementById("directionsContent").innerHTML =
+        '<div class="placeholder"><p class="lead">Directions cleared.</p><p>The next API response will repopulate this table.</p></div>';
+
+      if (state.map) {
+        clearMapLayers();
+        state.map.setView([8.228, 124.245], 11);
+      }
+    }
+
+    function clearMapLayers() {
+      if (!state.map) {
+        return;
+      }
+      if (state.routeLine) {
+        state.map.removeLayer(state.routeLine);
+        state.routeLine = null;
+      }
+      if (state.startMarker) {
+        state.map.removeLayer(state.startMarker);
+        state.startMarker = null;
+      }
+      if (state.endMarker) {
+        state.map.removeLayer(state.endMarker);
+        state.endMarker = null;
+      }
+    }
+
+    function getCurrentLocation() {
+      if (!navigator.geolocation) {
+        showError("Geolocation is not supported in this browser.");
+        return;
+      }
+
+      clearError();
+      navigator.geolocation.getCurrentPosition(
+        function (position) {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          document.getElementById("start").value = lat.toFixed(6) + ", " + lng.toFixed(6);
+
+          if (ensureMapQuestReady()) {
+            clearMapLayers();
+            state.startMarker = L.marker([lat, lng]).addTo(state.map).bindPopup("Current location");
+            state.map.setView([lat, lng], 13);
+          }
+        },
+        function () {
+          showError("Could not get your current location.");
+        }
+      );
+    }
+
+    function routeModeLabel(mode) {
+      const labels = {
+        fastest: "Car (Fastest)",
+        bicycle: "Bicycle",
+        pedestrian: "Walking"
+      };
+      return labels[mode] || mode;
+    }
+
+    function formatResolvedLocation(location) {
+      if (!location) {
+        return "N/A";
+      }
+
+      const parts = [
+        location.street,
+        location.adminArea5,
+        location.adminArea3,
+        location.adminArea1,
+        location.postalCode
+      ].filter(Boolean);
+
+      return parts.join(", ") || location.dragLabel || "Resolved location";
+    }
+
+    function formatTimeText(seconds) {
+      const totalSeconds = Number(seconds) || 0;
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const remainingSeconds = totalSeconds % 60;
+
+      if (hours > 0) {
+        return hours + "h " + minutes + "m";
+      }
+      if (minutes > 0) {
+        return minutes + "m";
+      }
+      return remainingSeconds + "s";
+    }
+
+    function formatClockEta(seconds) {
+      const eta = new Date();
+      eta.setSeconds(eta.getSeconds() + (Number(seconds) || 0));
+      return eta.toLocaleTimeString();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function buildShapePoints(rawPoints) {
+      const points = [];
+      for (let index = 0; index < rawPoints.length; index += 2) {
+        points.push([rawPoints[index], rawPoints[index + 1]]);
+      }
+      return points;
+    }
+
+    function decodeJsonpResponse(response) {
+      if (!response || typeof response !== "object") {
+        throw new Error("MapQuest returned an invalid response.");
+      }
+
+      const info = response.info || {};
+      const statusCode = Number(info.statuscode || 0);
+      const messages = Array.isArray(info.messages) ? info.messages.filter(Boolean) : [];
+
+      if (statusCode !== 0) {
+        throw new Error(messages.join(" ") || "MapQuest could not process that route request.");
+      }
+
+      return response;
+    }
+
+    function requestRoute(start, end, routeType) {
+      return new Promise(function (resolve, reject) {
+        const callbackName = "mqRouteCallback_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+        const script = document.createElement("script");
+        const params = new URLSearchParams({
+          key: state.activeKey,
+          from: start,
+          to: end,
+          outFormat: "json",
+          ambiguities: "ignore",
+          unit: "k",
+          narrativeType: "text",
+          shapeFormat: "raw",
+          generalize: "0",
+          routeType: routeType,
+          timeType: "1",
+          callback: callbackName
+        });
+
+        function cleanup() {
+          delete window[callbackName];
+          script.remove();
+        }
+
+        window[callbackName] = function (response) {
+          try {
+            cleanup();
+            resolve(decodeJsonpResponse(response));
+          } catch (error) {
+            reject(error);
+          }
+        };
+
+        script.onerror = function () {
+          cleanup();
+          reject(new Error("Could not reach MapQuest. Check your internet connection and API key."));
+        };
+
+        script.src = "https://www.mapquestapi.com/directions/v2/route?" + params.toString();
+        document.body.appendChild(script);
+      });
+    }
+
+    async function getRoute() {
+      clearError();
+
+      const startVal = document.getElementById("start").value.trim();
+      const endVal = document.getElementById("end").value.trim();
+      const routeType = document.getElementById("mode").value;
+
+      if (!startVal || !endVal) {
+        showError("Please enter both a start location and a destination.");
+        return;
+      }
+
+      if (!ensureMapQuestReady()) {
+        return;
+      }
+
+      toggleLoader(true);
+      document.getElementById("statusDot").className = "status-dot";
+
+      try {
+        const response = await requestRoute(startVal, endVal, routeType);
+        const route = response && response.route ? response.route : null;
+
+        if (!route) {
+          throw new Error("MapQuest returned an empty route response.");
+        }
+
+        if (route.routeError && Number(route.routeError.errorCode) !== -400 && Number(route.routeError.errorCode) !== 0) {
+          throw new Error(route.routeError.message || "No route could be calculated.");
+        }
+
+        const locations = route.locations || [];
+        const startLocation = locations[0];
+        const endLocation = locations[locations.length - 1];
+        const maneuvers = route.legs && route.legs[0] ? route.legs[0].maneuvers || [] : [];
+        const shapePoints = route.shape && Array.isArray(route.shape.shapePoints) ? route.shape.shapePoints : [];
+
+        if (!shapePoints.length) {
+          throw new Error("MapQuest did not return route geometry for this request.");
+        }
+
+        renderSummary({
+          startInput: startVal,
+          endInput: endVal,
+          routeType: routeType,
+          route: route,
+          startLocation: startLocation,
+          endLocation: endLocation,
+          maneuverCount: maneuvers.length
+        });
+
+        renderDirections(maneuvers);
+        renderMap(shapePoints, startLocation, endLocation, startVal, endVal);
+
+        document.getElementById("statusDot").className = "status-dot active";
+      } catch (error) {
+        showError(extractErrorMessage(error));
+      } finally {
+        toggleLoader(false);
+      }
+    }
+
+    function extractErrorMessage(error) {
+      if (!error) {
+        return "Something went wrong while requesting the route.";
+      }
+
+      if (typeof error === "string") {
+        return error;
+      }
+
+      if (error.message) {
+        return error.message;
+      }
+
+      if (error.error && error.error.message) {
+        return error.error.message;
+      }
+
+      return "Something went wrong while requesting the route.";
+    }
+
+    function renderSummary(data) {
+      const route = data.route;
+      const distanceKm = Number(route.distance || 0).toFixed(2);
+      const timeSeconds = Number(route.realTime || route.time || 0);
+      const summaryRows = [
+        ["API Provider", "MapQuest Directions API", "INPUT"],
+        ["Starting Location", escapeHtml(data.startInput), "INPUT"],
+        ["Destination", escapeHtml(data.endInput), "INPUT"],
+        ["Transport Mode", escapeHtml(routeModeLabel(data.routeType)), "INPUT"],
+        ["Resolved Start", escapeHtml(formatResolvedLocation(data.startLocation)), "OUTPUT"],
+        ["Resolved Destination", escapeHtml(formatResolvedLocation(data.endLocation)), "OUTPUT"],
+        ["Distance", distanceKm + " km", "OUTPUT"],
+        ["Formatted Time", escapeHtml(route.formattedTime || formatTimeText(timeSeconds)), "OUTPUT"],
+        ["ETA", escapeHtml(formatClockEta(timeSeconds)), "OUTPUT"],
+        ["Fuel Used", route.fuelUsed != null ? escapeHtml(String(route.fuelUsed)) : "N/A", "OUTPUT"],
+        ["Has Toll Road", route.hasTollRoad ? "Yes" : "No", "OUTPUT"],
+        ["Has Highway", route.hasHighway ? "Yes" : "No", "OUTPUT"],
+        ["Route Session ID", escapeHtml(route.sessionId || "N/A"), "OUTPUT"],
+        ["Total Maneuvers", escapeHtml(String(data.maneuverCount)), "OUTPUT"]
+      ];
+
+      const html = summaryRows
+        .map(function (row) {
+          const tagClass = row[2] === "INPUT" ? "tag-blue" : "tag-green";
+          return (
+            "<tr>" +
+              "<td>" + row[0] + "</td>" +
+              "<td>" + row[1] + "</td>" +
+              '<td><span class="tag ' + tagClass + '">' + row[2] + "</span></td>" +
+            "</tr>"
+          );
+        })
+        .join("");
+
+      document.getElementById("summaryContent").innerHTML =
+        '<div class="table-scroll"><table class="summary-table">' +
+        "<thead><tr><th>Parameter</th><th>Value</th><th>Type</th></tr></thead>" +
+        "<tbody>" + html + "</tbody></table></div>";
+    }
+
+    function renderDirections(maneuvers) {
+      if (!maneuvers.length) {
+        document.getElementById("directionsContent").innerHTML =
+          '<div class="placeholder"><p class="lead">No maneuvers returned.</p><p>The route response did not include step-by-step directions.</p></div>';
+        return;
+      }
+
+      const rows = maneuvers
+        .map(function (maneuver, index) {
+          const distance = Number(maneuver.distance || 0).toFixed(2);
+          const seconds = Number(maneuver.time || 0);
+          return (
+            "<tr>" +
+              '<td><span class="step-num">' + (index + 1) + "</span></td>" +
+              "<td>" + escapeHtml(maneuver.narrative || "Continue") + "</td>" +
+              "<td>" + distance + " km</td>" +
+              "<td>" + escapeHtml(formatTimeText(seconds)) + "</td>" +
+            "</tr>"
+          );
+        })
+        .join("");
+
+      document.getElementById("directionsContent").innerHTML =
+        '<div class="table-scroll"><table class="dir-table">' +
+        "<thead><tr><th>#</th><th>Instruction</th><th>Dist. (km)</th><th>Time</th></tr></thead>" +
+        "<tbody>" + rows + "</tbody></table></div>";
+    }
+
+    function renderMap(shapePoints, startLocation, endLocation, startLabel, endLabel) {
+      if (!state.map) {
+        return;
+      }
+
+      clearMapLayers();
+
+      const polylinePoints = buildShapePoints(shapePoints);
+      state.routeLine = L.polyline(polylinePoints, {
+        color: "#3b82f6",
+        weight: 5,
+        opacity: 0.9
+      }).addTo(state.map);
+
+      if (startLocation && startLocation.latLng) {
+        state.startMarker = L.marker([startLocation.latLng.lat, startLocation.latLng.lng])
+          .addTo(state.map)
+          .bindPopup("<strong>Start:</strong> " + escapeHtml(startLabel));
+      }
+
+      if (endLocation && endLocation.latLng) {
+        state.endMarker = L.marker([endLocation.latLng.lat, endLocation.latLng.lng])
+          .addTo(state.map)
+          .bindPopup("<strong>Destination:</strong> " + escapeHtml(endLabel))
+          .openPopup();
+      }
+
+      state.map.fitBounds(state.routeLine.getBounds(), {
+        padding: [20, 20]
+      });
+    }
+  </script>
+</body>
+</html>
